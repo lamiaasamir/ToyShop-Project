@@ -1,9 +1,31 @@
 {
   "dependencies": {
+    "body-parser": "^1.20.1",
     "dotenv": "^16.0.3",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "mysql": "^2.18.1",
     "mysql2": "^2.3.3",
+    "request": "^2.88.2",
     "util": "^0.12.5"
-  }
+  },
+  "name": "toyshop-project",
+  "description": "",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://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@github.com/lamiaasamir/ToyShop-Project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lamiaasamir/ToyShop-Project/issues"
+  },
+  "homepage": "https://github.com/lamiaasamir/ToyShop-Project#readme"
 }
