@@ -43,6 +43,14 @@ app.listen('3000', () => {
     console.log('Listening to port 3000..');
 });
 
+// // Set the search filters
+// const filters = {
+//   brand: req.body.brand || [],
+//   price: {
+//     min: req.body['price-min'] || undefined,
+//     max: req.body['price-max'] || undefined
+//   }
+// };
 // app.get('/', function(req, res){
 //     res.render('items/index')
 // });

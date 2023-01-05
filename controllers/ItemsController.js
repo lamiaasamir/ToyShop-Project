@@ -51,10 +51,10 @@ module.exports = {
             }
             console.log(brand);
             console.log(items);
-            
+            res.render('items/index', { items , brands});
 
 
-            res.render('items/single_brand', { items , brand});
+            //res.render('items/single_brand', { items , brand});
         } catch (err) {
             res.status(500).send(err);
         }
@@ -113,6 +113,23 @@ module.exports = {
         var total = req.session.total;
 
         res.render('items/cart', {cart: cart, total:total});
+           
+    },
+    getProducts: async (req, res) => {
+        
+
+        try {
+            const items = await sqlQuery('SELECT * FROM items');
+            const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
+            // shuffle items at random
+            for (let i = items.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [items[i], items[j]] = [items[j], items[i]];
+            }
+            res.render('items/products', { items, brands});
+        } catch (err) {
+            res.status(500).send(err);
+        }
            
     },
     updateCart: async (req, res) => {
