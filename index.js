@@ -14,11 +14,16 @@ require('dotenv').config();
 
 // create express app
 const app = express();
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(session({secret: "secret"}))
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(flash());
+
+app.use(bodyParser.json());
+
+
+
 
 
 // import routes

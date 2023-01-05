@@ -1,27 +1,7 @@
 
 
 <%- include ('_layouts/header.ejs') %>
-<script>
-    const form = document.querySelector('#filter-form');
-    
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-    
-      // Send the form data to the server
-      fetch('/filter', {
-        method: 'POST',
-        body: new FormData(form)
-      })
-      .catch((error) => {
-    console.error(error);
-        })
-        .then((response) => response.json())
-        .then((data) => {
-          // Update the page with the filtered products
-          updatePage(data);
-        });
-    });
-    </script>
+
 
 
     <!-- Page Header Start -->
@@ -43,21 +23,17 @@
         <div class="row px-xl-5">
             <!-- Shop Sidebar Start -->
             <div class="col-lg-3 col-md-12">
-                <!-- Price Start -->
+                <!-- Price Start
                 <div class="border-bottom mb-4 pb-4">
                     <h5 class="font-weight-semi-bold mb-4">Filter by price</h5>
-                    <form id="filter-form" method="post">
+                    <form id="filter-form" method="post" action="/filter">
                         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                             <input type="checkbox" class="custom-control-input" checked name="price-all">
                             <label class="custom-control-label" for="price-all">All Price</label>
                             <span class="badge border font-weight-normal">1000</span>
                         </div>
                         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                            
-                            <input type="number" name="price-min" min="0">
                             <input type="checkbox" class="custom-control-input" name="price-1">
-                            <input type="number" name="price-max" max="100">
-
                             <label class="custom-control-label" for="price-1">$0 - $100</label>
                             <span class="badge border font-weight-normal">150</span>
                         </div>
@@ -80,28 +56,56 @@
                             <input type="checkbox" class="custom-control-input" name="price-5">
                             <label class="custom-control-label" for="price-5">$400 - $500</label>
                             <span class="badge border font-weight-normal">168</span>
-                        </div>
+                        </div> -->
                         
-                </div>
+                <!-- </div> -->
                 <!-- Price End -->
                 
                 <!-- brand Start -->
                 <div class="border-bottom mb-4 pb-4">
-                    <h5 class="font-weight-semi-bold mb-4">Filter by brand</h5>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                            <input type="checkbox" class="custom-control-input" checked name="brand" value="all-brands">
-                            <label class="custom-control-label" for="price-all">All brands</label>
-                            <span class="badge border font-weight-normal">1000</span>
-                        </div>
-                        <% brands.forEach(function(brand){ %>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                            <input type="checkbox" class="custom-control-input" name="brand" value="<%= brand.brand %>">
+
+                    <form id="filter-form" method="post">
+                        <div class="border-bottom mb-4 pb-4">
+                          <h5 class="font-weight-semi-bold mb-4">Filter by brand</h5>
+                          <% brands.forEach(function(brand){ %>
+                          <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                            <input type="checkbox" class="custom-control-input" name="brand" value="<%= brand.brand %>" id = "<%= brand.brand %>"  >
                             <label class="custom-control-label" for="<%= brand.brand %>"><%= brand.brand %></label>
                             <span class="badge border font-weight-normal"><%= brand.count %></span>
+                          </div>
+                          <% }); %>
                         </div>
-                        <% }); %>
-                    <button type="submit">Filter</button>
-                    </form>
+                        <button type="submit">Filter</button>
+                      </form>
+                    
+<script>
+    const form = document.getElementById('filter-form');
+  
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+  
+      const params = new URLSearchParams();
+      for (const pair of new FormData(form)) {
+        params.append(pair[0], pair[1]);
+      }
+  
+      fetch('/filter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: params
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          // Update the page with the filtered products
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
+  </script>
                 </div>
                 <!-- Color End -->
 
@@ -202,7 +206,7 @@
 
     <%- include ('_layouts/footer.ejs') %>
 
-
+    
     <!-- Back to Top -->
     <a href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
 

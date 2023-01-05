@@ -166,6 +166,48 @@ module.exports = {
     calculateTotal(cart, req);
     // req.flash('success', 'cart updated');
     res.redirect('back');
+    },
+
+    filterProducts: async (req, res) => {
+        
+
+        try {
+            const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
+            // Extract the filters from the request body
+            const filters = {
+            brand: req.body.brand || []
+                        // price: {
+                    //   min: req.body['price-min'] || undefined,
+                    //   max: req.body['price-max'] || undefined
+                    // }
+                };
+            console.log(filters);
+
+        // Filter the products using the filters
+        let query = 'SELECT * FROM items WHERE';
+        if (filters.brand.length > 0) {
+            query += ` brand IN ("${filters.brand.join('","')}")`;
+        }
+
+        //   if (filters.price.min) {
+        //     query += ` AND price >= ${filters.price.min}`;
+        //   }
+        //   if (filters.price.max) {
+        //     query += ` AND price <= ${filters.price.max}`;
+        //   }
+
+        // Execute the query and send the filtered products back to the client
+            console.log(query);
+            const items = await sqlQuery(query);
+            console.log(items);
+
+            // res.send(items);
+            res.render('items/products', { items, brands});
+
+        } catch (err) {
+            res.status(500).send(err);
+        }
+           
     }
 
 
