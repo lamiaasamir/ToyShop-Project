@@ -101,6 +101,7 @@ module.exports = {
         }
     },
     getCart: async (req, res) => {
+        const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
         
         if(!req.session.cart){
             req.session.cart = [];
@@ -108,7 +109,7 @@ module.exports = {
         var cart = req.session.cart;
         var total = req.session.total;
 
-        res.render('items/cart', {cart: cart, total:total});
+        res.render('items/cart', {cart: cart, total:total, brands: brands});
            
     },
     getProducts: async (req, res) => {
