@@ -16,8 +16,8 @@ router.get('/brand/:brand', ItemsController.getItemsByBrand);
 
 router.post('/add_to_cart', ItemsController.add_cart);
 router.get('/cart', ItemsController.getCart);
-router.post('/filter',ItemsController.filterProducts);
-router.get('/products', ItemsController.getProducts);
+router.get('/filter',ItemsController.filterProducts);
+router.get('/products', ItemsController.filterProducts);
 router.get('/cart/update/:product', ItemsController.updateCart);
 
 

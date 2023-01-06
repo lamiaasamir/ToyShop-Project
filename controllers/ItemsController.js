@@ -49,8 +49,6 @@ module.exports = {
                 const j = Math.floor(Math.random() * (i + 1));
                 [items[i], items[j]] = [items[j], items[i]];
             }
-            console.log(brand);
-            console.log(items);
             res.render('items/index', { items , brands});
 
 
@@ -88,7 +86,6 @@ module.exports = {
             }
 
             calculateTotal(cart, req);
-            console.log('product added');
             req.flash('success', 'Product added!');
             res.redirect('back');
 
@@ -98,7 +95,6 @@ module.exports = {
             var cart = req.session.cart;
             cart.push(product);
             calculateTotal(cart, req);
-            console.log('product added');
             req.flash('success', 'Product added!');
             res.redirect('back');
 
@@ -173,33 +169,44 @@ module.exports = {
 
         try {
             const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
+            let query = 'SELECT * FROM items';
             // Extract the filters from the request body
-            const filters = {
-            brand: req.body.brand || []
-                        // price: {
-                    //   min: req.body['price-min'] || undefined,
-                    //   max: req.body['price-max'] || undefined
-                    // }
+
+            if(req.query.brand != undefined || req.query.price != undefined){
+            if(req.query.brand != undefined){
+                const filters = {
+                brand: req.query.brand || [],
                 };
-            console.log(filters);
+
 
         // Filter the products using the filters
-        let query = 'SELECT * FROM items WHERE';
+        
         if (filters.brand.length > 0) {
-            query += ` brand IN ("${filters.brand.join('","')}")`;
+            query += ` WHERE brand IN ("${filters.brand.join('","')}")`;
         }
 
-        //   if (filters.price.min) {
-        //     query += ` AND price >= ${filters.price.min}`;
-        //   }
-        //   if (filters.price.max) {
-        //     query += ` AND price <= ${filters.price.max}`;
-        //   }
+
+            }
+        if(req.query.price != undefined){
+            const filters = {
+                price: req.query.price || None
+               
+                    };
+    
+            if (req.query.price) {
+                query += ` AND price <= ${filters.price}`;
+            }
+        }
+            
+       
+    
+    
+    }
 
         // Execute the query and send the filtered products back to the client
             console.log(query);
             const items = await sqlQuery(query);
-            console.log(items);
+            //console.log(items);
 
             // res.send(items);
             res.render('items/products', { items, brands});
