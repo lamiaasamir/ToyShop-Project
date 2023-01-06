@@ -15,7 +15,7 @@ require('dotenv').config();
 // create express app
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(session({secret: "secret"}))
+app.use(session({secret: "secret",resave: true,saveUninitialized: true}))
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(flash());
@@ -33,7 +33,6 @@ app.use(routes);
 // define images folder
 //app.use('/images', express.static('./images'));
 app.use(express.static('public'));
-
 
 // define styles folder
 //app.use('/styles', express.static('./views/styles'));
@@ -59,3 +58,4 @@ app.listen('3000', () => {
 // app.get('/', function(req, res){
 //     res.render('items/index')
 // });
+
