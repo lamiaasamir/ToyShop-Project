@@ -64,14 +64,34 @@
                     <h1 class="m-0 display-5 font-weight-semi-bold"><span class="text-primary font-weight-bold border px-3 mr-1">E</span>Shopper</h1>
                 </a>
             </div>
+
+           
+
             <div class="col-lg-6 col-6 text-left">
-                <form action="">
+                <form action="/items" method="GET">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search for products">
+                        <input type="text" class="form-control" placeholder="Search for products" name="searchValue">
                         <div class="input-group-append">
-                            <span class="input-group-text bg-transparent text-primary">
-                                <i class="fa fa-search"></i>
-                            </span>
+                            <div class="dropdown">
+                                <!-- <button class="btn btn-secondary dropdown-toggle" type="button" name="search" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                  Search By
+                                </button> -->
+                                <select id="dropdownMenuButton" name="searchType"class="form-control" data-role="select-dropdown">
+                                  <option class="dropdown-item" href="#" value="name">Name</option>
+                                  <option class="dropdown-item" href="#"value="brand">Brand </option>
+                                  <option class="dropdown-item" href="#"value="priceMin">Minimum Price</option>
+                                  <option class="dropdown-item" href="#"value="priceMax">Maximum Price</option>
+                                </select>
+                                
+                              
+                                
+                              </div>
+                              
+                            <button type="submit" class="input-group-text bg-transparent text-primary"><span >
+                                <i class="fa fa-search"></i></span></button>
+
+                            
+                            
                         </div>
                     </div>
                 </form>
