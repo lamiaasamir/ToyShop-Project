@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router();
 
-var mysql = require('mysql');
+// var mysql = require('mysql');
 const fs = require('fs');
 const multer = require('multer');
 const upload = multer();
 
-const connection = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'shop',
-    namedPlaceholders: true,
-  });
+// const connection = mysql.createPool({
+//     host: 'localhost',
+//     user: 'root',
+//     password: '',
+//     database: 'shop',
+//     namedPlaceholders: true,
+//   });
   
 
 //import controllers
@@ -38,49 +38,9 @@ router.get ('/checkout', ItemsController.go_checkout);
 router.post('/place_order', ItemsController.place_order);
 router.post('/payment',ItemsController.pay);
 
+
 // This route allows the user to search for items by name, brand, or price range
-
-router.get('/items', async(req, res) => {
-    // Get the query parameters from the request
-    const { searchValue, searchType} = req.query;
-  
-    // Construct the WHERE clause of the SQL query
-    let whereClause = '';
-    let params = [];
-    if (searchType=="name" ){
-        whereClause += ' AND name LIKE ?';
-        params.push(`%${searchValue}%`);
-    }
-    if (searchType=="brand" ){
-        whereClause += ' AND brand LIKE ?';
-        params.push(`%${searchValue}%`);
-    }
-    
-    if (searchType=="minPrice" ){
-        whereClause += ` AND price >= ${Float.parseFloat(searchValue)}?`; //? needed?
-        params.push(searchValue);
-    }
-
-    
-    if (searchType=="maxPrice" ){
-        whereClause += ` AND price <= ${Float.parseFloat(searchValue)}?`; //? needed ?
-        params.push(searchValue);
-
-    }
-  
-    const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
-    // Execute the SQL query using prepared statements
-    connection.query(`SELECT * FROM items WHERE 1=1${whereClause}`, params, (error, results) => {
-      if (error) {
-        res.status(500).send({ error: 'Error querying the database' });
-        return;
-      }
-      res.render('items/products', { items:results, brands});
-      
-      
-    });
-    
-  });
+router.get('/items', ItemsController.searchItems);
 
 
   router.get('/admin/products',async (req, res) => {
