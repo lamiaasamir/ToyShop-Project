@@ -83,6 +83,7 @@ module.exports = {
    ,
 
     searchItems: async (req, res) => {
+        console.log("hereeeeeeeeeeeeeeeeee")
         // Get the query parameters from the request
         const { searchValue, searchType} = req.query;
       
@@ -113,20 +114,109 @@ module.exports = {
       
         const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
         // Execute the SQL query using prepared statements
-        (`SELECT * FROM items WHERE 1=1${whereClause}`, params)
-        connection.query(`SELECT * FROM items WHERE 1=1${whereClause}`, params, (error, results) => {
+        console.log("here")
+        connection.query(`SELECT * FROM items WHERE 1=1${whereClause} LIMIT 5`, params, (error, results) => {
           if (error) {
             res.status(500).send({ error: 'Error querying the database' });
             return;
           }
-          res.render('items/products', { items:results, brands});
+          res.send(results);
+          //res.render('items/products', { items:results, brands});
           
           
         });
      
      
    }
-,
+,searchItems: async (req, res) => {
+    // Get the query parameters from the request
+    const { searchValue, searchType} = req.query;
+  
+    // Construct the WHERE clause of the SQL query
+    let whereClause = '';
+    let params = [];
+    if (searchType=="name" ){
+        whereClause += ' AND name LIKE ?';
+        params.push(`%${searchValue}%`);
+    }
+    if (searchType=="brand" ){
+        whereClause += ' AND brand LIKE ?';
+        params.push(`%${searchValue}%`);
+    }
+    
+    if (searchType=="priceMin" ){
+        whereClause += ` AND price >= ?`; //? needed?
+        params.push(searchValue);
+    }
+
+    
+    if (searchType=="priceMax" ){
+        console.log("here")
+        whereClause += ` AND price <= ?`; //? needed ?
+        params.push(searchValue);
+
+    }
+  
+    const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
+    // Execute the SQL query using prepared statements
+    connection.query(`SELECT * FROM items WHERE 1=1${whereClause} LIMIT 5`, params, (error, results) => {
+      if (error) {
+        res.status(500).send({ error: 'Error querying the database' });
+        return;
+      }
+      res.send(results);
+      //res.render('items/products', { items:results, brands});
+      
+      
+    });
+ 
+ 
+}
+,searchItemsClick: async (req, res) => {
+// Get the query parameters from the request
+const { searchValue, searchType} = req.query;
+
+// Construct the WHERE clause of the SQL query
+let whereClause = '';
+let params = [];
+if (searchType=="name" ){
+    whereClause += ' AND name LIKE ?';
+    params.push(`%${searchValue}%`);
+}
+if (searchType=="brand" ){
+    whereClause += ' AND brand LIKE ?';
+    params.push(`%${searchValue}%`);
+}
+
+if (searchType=="priceMin" ){
+    whereClause += ` AND price >= ?`; //? needed?
+    params.push(searchValue);
+}
+
+
+if (searchType=="priceMax" ){
+    console.log("here")
+    whereClause += ` AND price <= ?`; //? needed ?
+    params.push(searchValue);
+
+}
+
+const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
+// Execute the SQL query using prepared statements
+console.log("here")
+connection.query(`SELECT * FROM items WHERE 1=1${whereClause} LIMIT 5`, params, (error, results) => {
+  if (error) {
+    res.status(500).send({ error: 'Error querying the database' });
+    return;
+  }
+  //res.send(results);
+  res.render('items/products', { items:results, brands});
+  
+  
+});
+
+
+},
 
 getItemsById: async (req, res) => {
     var id = req.params.id;

@@ -65,9 +65,10 @@
                 </a>
             </div>
             <div class="col-lg-6 col-6 text-left">
-                <form action="/items" method="GET">
+                <form action="/itemsSearch" method="GET">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search for products" name="searchValue">
+                        <input type="text" class="form-control" id="autocomplete_search" placeholder="Search for products" name="searchValue">
+                        
                         <div class="input-group-append">
                             <div class="dropdown">
                                 <!-- <button class="btn btn-secondary dropdown-toggle" type="button" name="search" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -81,8 +82,9 @@
                                 </select>
                                 
                               
-                                
+                                <span id="search_result"></span>
                               </div>
+                              
                               
                             <button type="submit" class="input-group-text bg-transparent text-primary"><span >
                                 <i class="fa fa-search"></i></span></button>
@@ -92,6 +94,51 @@
                         </div>
                     </div>
                 </form>
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+                <script>
+                    $(document).ready(function() {
+                            $('#autocomplete_search').keyup(function() {
+                            var searchValue = $(this).val();
+                            var searchType = document.getElementById("dropdownMenuButton");
+                            var searchType = searchType.value;
+                            $.ajax({
+                            url: '/items',
+                            data: {searchValue: searchValue,searchType:searchType },
+                            success: function(responseData) {
+                                // Display the search results
+                                var html = '<ul class="list-group float position-absolute mt-1" style ="z-index: 5;">';
+                
+                            if(responseData.length > 0)
+                            {
+                                for(var count = 0; count < responseData.length; count++)
+                                {
+
+                                    if(searchType == "brand"){
+                                            var href = "/brand/"+responseData[count].brand +"";
+                
+                                        html += '<a href=' + href + ' class="list-group-item list-group-item-action" >'+responseData[count].brand+'</a>';
+                                    }else if(searchValue == '')
+                                                html += '';
+                                    else{
+                                    var href = "/product/"+responseData[count].id +"";
+                                        html += '<a href=' + href + '  class="list-group-item list-group-item-action" >'+responseData[count].name+'</a>';
+                                }}
+                            }
+                            else
+                            {
+                                html += '<a href="#" class="list-group-item list-group-item-action disabled">No PoductsFound</a>';
+                            }
+                
+                            html += '</ul>';
+                
+                            document.getElementById('search_result').innerHTML = html;
+                                        }
+                                        });
+                                    });
+                                    });
+                
+                </script>
             </div>
             <div class="col-lg-3 col-6 text-right">
                 <a href="" class="btn border">
@@ -119,7 +166,7 @@
                 <nav class="collapse show navbar navbar-vertical navbar-light align-items-start p-0 border border-top-0 border-bottom-0" id="navbar-vertical">
                     <div class="navbar-nav w-100 overflow-hidden" style="height: 410px">
                         <% brands.forEach(function(brand){ %>
-                        <a href="" class="nav-item nav-link"><%= brand.brand %></a>
+                        <a href="/brand/<%= brand.brand %>" class="nav-item nav-link"><%= brand.brand %></a>
                         <% }); %>
                     </div>
                 </nav>
