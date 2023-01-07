@@ -46,27 +46,40 @@ module.exports = {
             res.status(500).send(err);
         }
     },
-    sortItems: async (req, res) => {
-        // Get the query parameters from the request
-   const {sortType} = req.query;
- 
-   // Construct the WHERE clause of the SQL query
-   let Clause = '';
-   Clause += `${(sortType)}?`;
-       
-
-   const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
-   // Execute the SQL query using prepared statements
-   connection.query(`SELECT * FROM items ORDER BY ${Clause}`, (error, results) => {
-     if (error) {
-       res.status(500).send({ error: 'Error querying the database' });
-       return;
-     }
-     res.render('items/products', { items:results, brands});
+    sortItems: async (req, res) => { 
+        // Get the query parameters from the request 
+        const {sortType} = req.query; 
+        // let params = []; 
+        let Clause = ''; 
+        let query = 'SELECT * FROM items'; 
+        if (sortType=="nameASC" ){ 
+             
+            query+= ' ORDER BY name ASC'; 
+        } 
+        if (sortType=="brandASC" ){ 
+            query+= ' ORDER BY brand ASC'; 
+        } 
+        if (sortType=="priceASC" ){ 
+            query+= ' ORDER BY price ASC'; 
+        }        
+        if (sortType=="nameDESC" ){ 
+            query+= ' ORDER BY name DESC'; }
+        if (sortType=="brandDESC" ){ 
+            query+= ' ORDER BY brand DESC'; 
+        } 
+        if (sortType=="priceDESC" ){ 
+            query+= ' ORDER BY price DESC'; 
+        }        
+        try{ 
+        const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand'); 
+        const items = await sqlQuery(query); 
      
-     
-   });
-   }
+        res.render('items/products', { items, brands});} 
+        catch (err) { 
+            res.status(500).send(err); 
+        } 
+            
+    } 
    ,
 
     searchItems: async (req, res) => {

@@ -41,6 +41,7 @@ router.post('/payment',ItemsController.pay);
 
 // This route allows the user to search for items by name, brand, or price range
 router.get('/items', ItemsController.searchItems);
+router.get('/sort', ItemsController.sortItems);
 
 
   router.get('/admin/products',async (req, res) => {
