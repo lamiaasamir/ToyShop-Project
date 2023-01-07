@@ -46,6 +46,29 @@ module.exports = {
             res.status(500).send(err);
         }
     },
+    sortItems: async (req, res) => {
+        // Get the query parameters from the request
+   const {sortType} = req.query;
+ 
+   // Construct the WHERE clause of the SQL query
+   let Clause = '';
+   Clause += `${(sortType)}?`;
+       
+
+   const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
+   // Execute the SQL query using prepared statements
+   connection.query(`SELECT * FROM items ORDER BY ${Clause}`, (error, results) => {
+     if (error) {
+       res.status(500).send({ error: 'Error querying the database' });
+       return;
+     }
+     res.render('items/products', { items:results, brands});
+     
+     
+   });
+   }
+   ,
+
     searchItems: async (req, res) => {
         // Get the query parameters from the request
         const { searchValue, searchType} = req.query;
