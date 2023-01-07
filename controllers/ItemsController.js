@@ -402,7 +402,55 @@ getItemsById: async (req, res) => {
     },
 
  
-   
+    filterProducts: async (req, res) => {
+        try {
+            const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
+            var page = parseInt(req.query.page) || 1;
+            var perPage = parseInt(req.query.per_page) || 7;
+            var offset = (page - 1) * perPage;
+            let query = 'SELECT * FROM items LIMIT ' + perPage + ` OFFSET ` + offset + ``;
+            console.log(query);
+
+            // Extract the filters from the request body
+
+            if(req.query.brand != undefined || req.query.price != undefined){
+            if(req.query.brand != undefined){
+                const filters = {
+                brand: req.query.brand || [],
+                };
+            // Filter the products using the filters
+        
+            if (filters.brand.length > 0) {
+            query += ` WHERE brand IN ("${filters.brand.join('","')}")`;
+             }
+            query += ` AND `;
+            
+
+            }else query += ` where `;
+            if(req.query.price != undefined){
+                const filters = {
+                price: req.query.price || None
+                    };
+            
+            if (req.query.price) {
+                query += `price <= ${filters.price}`;
+            }
+          }
+    
+         }
+
+            // Execute the query and send the filtered products back to the client
+            console.log(query);
+            const items = await sqlQuery(query);
+            //console.log(items);
+
+            res.render('items/products', { items, brands, page});
+
+        } catch (err) {
+            res.status(500).send(err);
+        }
+           
+    } 
 
 
 }
