@@ -1,7 +1,10 @@
 
 <%- include ('_layouts/header.ejs') %>
-
+<br>
+<br>
 <button id="add-product-btn">Add Product</button>
+<br>
+<br>
 
 <form id="add-product-form" style="display: none;" action="/admin/products" method = "post" enctype="multipart/form-data">
  <label for="name">Name:</label>
@@ -29,14 +32,14 @@
  <button type="submit">Save</button>
 </form>
 
-<table id="products">
+<table id="products" class="table">
    <tr>
-     <th>Name</th>
-     <th>Brand</th>
-     <th>Description</th>
-     <th>Price</th>
-     <th>Image</th>
-     <th></th>
+     <th  scope="col" >Name</th>
+     <th  scope="col">Brand</th>
+     <th  scope="col">Description</th>
+     <th  scope="col">Price</th>
+     <th  scope="col">Image</th>
+     <th  scope="col"></th>
    </tr>
 <% items.forEach(function(product){ %>
    <tr>
@@ -46,7 +49,7 @@
      <td><%= product.price%></td>
      <td><%= product.image%></td>
      <td>
-       <button class="edit-product-btn" data-id="<%= product.id%>">Edit</button>
+       
        <button class="delete-product-btn" data-id="<%= product.id%>" method ="delete" onclick= "location.href='/admin/products/<%= product.id%>'" type="button">Delete</button>
      </td>
    </tr>

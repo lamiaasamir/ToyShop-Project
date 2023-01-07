@@ -200,6 +200,10 @@ module.exports = {
            
     },
     go_checkout: async(req, res) => {
+
+        if (!req.session.cart)
+            req.session.cart = [];
+            
         var cart = req.session.cart;
         const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
         var total = req.session.total
