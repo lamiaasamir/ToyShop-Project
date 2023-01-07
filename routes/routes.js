@@ -27,6 +27,7 @@ router.get('/', ItemsController.getItems);
 
 // define route to catch the items under which brand
 router.get('/brand/:brand', ItemsController.getItemsByBrand);
+router.get('/product/:id', ItemsController.getItemsById);
 
 router.post('/add_to_cart', ItemsController.add_cart);
 router.get('/cart', ItemsController.getCart);

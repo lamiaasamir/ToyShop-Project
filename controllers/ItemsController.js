@@ -127,6 +127,21 @@ module.exports = {
      
    }
 ,
+
+getItemsById: async (req, res) => {
+    var id = req.params.id;
+    try {
+        const items = await sqlQuery("SELECT * FROM items where id = "+ id+"");
+        const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
+        res.render('items/single_product', { items , brands});
+
+
+        //res.render('items/single_brand', { items , brand});
+    } catch (err) {
+        res.status(500).send(err);
+    }
+},
+
     getItemsByBrand: async (req, res) => {
         var brand = req.params.brand;
         try {
