@@ -6,13 +6,13 @@ const fs = require('fs');
 const multer = require('multer');
 const upload = multer();
 
-// const connection = mysql.createPool({
-//     host: 'localhost',
-//     user: 'root',
-//     password: '',
-//     database: 'shop',
-//     namedPlaceholders: true,
-//   });
+const mysql = require('mysql');
+const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'shop'
+  });
   
 
 //import controllers
@@ -85,50 +85,34 @@ router.get('/items', ItemsController.searchItems);
   });
   });
   
-  router.delete('/admin/products/:id', async(req, res) => {
-    connection.query('DELETE FROM items WHERE id = ?', [req.params.id], (error) => {
+  router.get('/admin/products/:id',async (req, res) => {
+    const id = req.params.id;
+    const product = await sqlQuery("SELECT image FROM items where id = "+ id);
+    connection.query('DELETE FROM items WHERE id = ?', [req.params.id],async (error) => {
       if (error) {
         res.status(500).send(error);
       } else {
-        res.send({ success: true });
+        
+        
+        // Delete image file from image folder
+        console.log(product)
+        product.forEach(myFunction);
+        var image
+      function myFunction(item) {
+          image = item.image;
+          }
+        console.log(image)
+        fs.unlinkSync(`${__dirname}/../public/img/${image}`);
+      
+        console.log("delete product");
+        res.redirect('back');
+        //res.send({ success: true });s
       }
     });
   });
+
   
-  // Order routes
-  
-  // router.get('/orders', (req, res) => {
-  //   connection.query('SELECT * FROM orders', (error, results) => {
-  //     if (error) {
-  //       res.status(500).send(error);
-  //     } else {
-  //       res.send(results);
-  //     }
-  //   });
-  // });
-  
-  // router.post('/orders', (req, res) => {
-  //     const { productId, quantity } = req.body;
-  //     connection.query('INSERT INTO orders SET ?', { productId, quantity }, (error) => {
-  //       if (error) {
-  //         res.status(500).send(error);
-  //       } else {
-  //         res.send({ success: true });
-  //       }
-  //     });
-  //   });
-    
-  //   router.put('/orders/:id', (req, res) => {
-  //     const { status } = req.body;
-  //     connection.query('UPDATE orders SET ? WHERE id = ?', [{ status }, req.params.id], (error) => {
-  //       if (error) {
-  //         res.status(500).send(error);
-  //       } else {
-  //         res.send({ success: true });
-  //       }
-  //     });
-  //   });
-    
+ 
   
 module.exports = router;
 
