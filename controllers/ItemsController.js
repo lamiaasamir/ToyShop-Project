@@ -1,10 +1,10 @@
 const { calculateMac } = require('request/lib/hawk');
 const sqlQuery = require('../config/db');
-const mysql = require('mysql2');
+const mysql = require('mysql');
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'password',
+    password: '',
     database: 'shop'
   });
 
@@ -85,20 +85,22 @@ module.exports = {
             params.push(`%${searchValue}%`);
         }
         
-        if (searchType=="minPrice" ){
-            whereClause += ` AND price >= ${Float.parseFloat(searchValue)}?`; //? needed?
+        if (searchType=="priceMin" ){
+            whereClause += ` AND price >= ?`; //? needed?
             params.push(searchValue);
         }
     
         
-        if (searchType=="maxPrice" ){
-            whereClause += ` AND price <= ${Float.parseFloat(searchValue)}?`; //? needed ?
+        if (searchType=="priceMax" ){
+            console.log("here")
+            whereClause += ` AND price <= ?`; //? needed ?
             params.push(searchValue);
     
         }
       
         const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
         // Execute the SQL query using prepared statements
+        (`SELECT * FROM items WHERE 1=1${whereClause}`, params)
         connection.query(`SELECT * FROM items WHERE 1=1${whereClause}`, params, (error, results) => {
           if (error) {
             res.status(500).send({ error: 'Error querying the database' });
@@ -117,12 +119,7 @@ module.exports = {
         try {
             const items = await sqlQuery("SELECT * FROM items where brand = '"+ brand+"'");
             const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
-            // shuffle items at random
-            for (let i = items.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [items[i], items[j]] = [items[j], items[i]];
-            }
-            res.render('items/index', { items , brands});
+            res.render('items/products', { items , brands});
 
 
             //res.render('items/single_brand', { items , brand});
@@ -302,17 +299,18 @@ module.exports = {
         if (filters.brand.length > 0) {
             query += ` WHERE brand IN ("${filters.brand.join('","')}")`;
         }
+       query += ` AND `;
+            
 
-
-            }
+            }else query += ` where `;
         if(req.query.price != undefined){
             const filters = {
                 price: req.query.price || None
                
                     };
-    
+            
             if (req.query.price) {
-                query += ` AND price <= ${filters.price}`;
+                query += `price <= ${filters.price}`;
             }
         }
             
