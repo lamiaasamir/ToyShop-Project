@@ -81,9 +81,14 @@
                     <div class="card-footer border-secondary bg-transparent">
                         <div class="d-flex justify-content-between mt-2">
                             <h5 class="font-weight-bold">Total</h5>
-                            <h5 class="font-weight-bold">$160</h5>
+                            <h5 class="font-weight-bold"><%= total +10 %></h5>
                         </div>
-                        <button class="btn btn-block btn-primary my-3 py-3">Proceed To Checkout</button>
+                        <div class="checkout-container">
+                            <form method="get" action="/checkout">
+                                <input type="submit" class="btn btn-block btn-primary my-3 py-3" value="Proceed To Checkout" name="">
+                            </form>
+                        </div>
+                        <!-- <button class="btn btn-block btn-primary my-3 py-3"> Proceed To Checkout</button> -->
                     </div>
                 </div>
             </div>

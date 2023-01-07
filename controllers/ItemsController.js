@@ -129,6 +129,50 @@ module.exports = {
         }
            
     },
+    go_checkout: async(req, res) => {
+        var cart = req.session.cart;
+        const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
+        var total = req.session.total
+        res.render('items/checkout', {total:total, brands:brands, cart:cart})
+    },
+    place_order: async(req, res) => {
+        var name = req.body.name;
+        var email = req.body.email;
+        var phone = req.body.phone;
+        var city = req.body.city;
+        var address = req.body.address;
+        var cost = req.session.total;
+        var status = "not paid";
+        var date = new Date();
+
+        const con = mysql.createConnection({
+            host:"localhost",
+            user:"root",
+            password:"",
+            database:"shop"
+        })
+
+        con.connect((err)=>{
+            if (err){
+                console.log(err)
+            }
+            else{
+                var query="INSERT INTO orders(cost, name, email, status, city, address,phone, date) VALUES ?";
+                var values = [[cost, name, email, status, city, address, phone, date]];
+                con.query(query,[values],(err, result)=>{
+                    res.redirect('/payment')
+                })
+            }
+        
+        })
+
+
+    },
+    pay: async (req, res)=>{
+        const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
+        var total = req.session.total
+        res.render('items/payment', {total:total,brands:brands})
+    },
     updateCart: async (req, res) => {
         var id = req.params.product;
         var cart = req.session.cart;

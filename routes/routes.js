@@ -20,6 +20,9 @@ router.get('/filter',ItemsController.filterProducts);
 router.get('/products', ItemsController.filterProducts);
 router.get('/cart/update/:product', ItemsController.updateCart);
 
+router.get ('/checkout', ItemsController.go_checkout);
+router.post('/place_order', ItemsController.place_order);
+router.get('/payment',ItemsController.pay);
 
 
 
