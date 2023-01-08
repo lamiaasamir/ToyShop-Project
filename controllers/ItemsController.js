@@ -8,7 +8,7 @@ const connection = mysql.createConnection({
     database: 'shop'
   });
 
-
+/***********************functions********************************/
 function isProductInCart(cart, id){
     for(let i=0; i<cart.length; i++){
         if (cart[i].id == id){
@@ -25,13 +25,15 @@ function calculateTotal(cart, req){
         //     total = total +(cart[i].sale_price*cart[i].quantity)
         // }
         // else{
-        total = total +(cart[i].price*cart[i].quantity)
+        total = total +(parseFloat(parseFloat(cart[i].price).toFixed(2))*cart[i].quantity)
         // }
+        total = parseFloat(parseFloat(total).toFixed(2))
     }
     req.session.total = total;
     return total;
 }
 module.exports = {
+    /*********************get*********************************/
     getItems: async (req, res) => {
         try {
             const items = await sqlQuery('SELECT * FROM items');
@@ -46,6 +48,40 @@ module.exports = {
             res.status(500).send(err);
         }
     },
+    getItemsById: async (req, res) => {
+        var id = req.params.id;
+        try {
+            const items = await sqlQuery("SELECT * FROM items where id = "+ id+"");
+            const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
+            res.render('items/single_product', { items , brands});
+    
+    
+            //res.render('items/single_brand', { items , brand});
+        } catch (err) {
+            res.status(500).send(err);
+        }
+    },
+    
+    getItemsByBrand: async (req, res) => {
+        var brand = req.params.brand;
+        try {
+            var page = parseInt(req.query.page) || 1;
+            var perPage = parseInt(req.query.per_page) || 7;
+            var offset = (page - 1) * perPage;
+            let query = 'SELECT * FROM items';
+            query+= " where brand = '"+ brand+"'";
+            query+= 'LIMIT ' + perPage + ` OFFSET ` + offset + ``
+            const items = await sqlQuery(query);
+            const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
+            res.render('items/products', { items , brands, page});
+
+
+            //res.render('items/single_brand', { items , brand});
+        } catch (err) {
+            res.status(500).send(err);
+        }
+    },
+    /************************************sort*****************************/
     sortItems: async (req, res) => { 
         // Get the query parameters from the request 
         const {sortType} = req.query; 
@@ -81,9 +117,8 @@ module.exports = {
             
     } 
    ,
-
+    /*****************************search*********************************/
     searchItems: async (req, res) => {
-        console.log("hereeeeeeeeeeeeeeeeee")
         // Get the query parameters from the request
         const { searchValue, searchType} = req.query;
       
@@ -128,34 +163,34 @@ module.exports = {
      
      
    }
-,searchItems: async (req, res) => {
-    // Get the query parameters from the request
-    const { searchValue, searchType} = req.query;
-  
-    // Construct the WHERE clause of the SQL query
-    let whereClause = '';
-    let params = [];
-    if (searchType=="name" ){
-        whereClause += ' AND name LIKE ?';
-        params.push(`%${searchValue}%`);
-    }
-    if (searchType=="brand" ){
-        whereClause += ' AND brand LIKE ?';
-        params.push(`%${searchValue}%`);
-    }
+    ,searchItems: async (req, res) => {
+        // Get the query parameters from the request
+        const { searchValue, searchType} = req.query;
     
-    if (searchType=="priceMin" ){
-        whereClause += ` AND price >= ?`; //? needed?
-        params.push(searchValue);
-    }
+        // Construct the WHERE clause of the SQL query
+        let whereClause = '';
+        let params = [];
+        if (searchType=="name" ){
+            whereClause += ' AND name LIKE ?';
+            params.push(`%${searchValue}%`);
+        }
+        if (searchType=="brand" ){
+            whereClause += ' AND brand LIKE ?';
+            params.push(`%${searchValue}%`);
+        }
+        
+        if (searchType=="priceMin" ){
+            whereClause += ` AND price >= ?`; //? needed?
+            params.push(searchValue);
+        }
 
-    
-    if (searchType=="priceMax" ){
-        console.log("here")
-        whereClause += ` AND price <= ?`; //? needed ?
-        params.push(searchValue);
+        
+        if (searchType=="priceMax" ){
+            console.log("here")
+            whereClause += ` AND price <= ?`; //? needed ?
+            params.push(searchValue);
 
-    }
+        }
   
     const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
     // Execute the SQL query using prepared statements
@@ -172,157 +207,234 @@ module.exports = {
  
  
 }
-,searchItemsClick: async (req, res) => {
-// Get the query parameters from the request
-const { searchValue, searchType} = req.query;
+    ,searchItemsClick: async (req, res) => {
+    // Get the query parameters from the request
+    const { searchValue, searchType} = req.query;
 
-// Construct the WHERE clause of the SQL query
-let whereClause = '';
-let params = [];
-if (searchType=="name" ){
-    whereClause += ' AND name LIKE ?';
-    params.push(`%${searchValue}%`);
-}
-if (searchType=="brand" ){
-    whereClause += ' AND brand LIKE ?';
-    params.push(`%${searchValue}%`);
-}
-
-if (searchType=="priceMin" ){
-    whereClause += ` AND price >= ?`; //? needed?
-    params.push(searchValue);
-}
-
-
-if (searchType=="priceMax" ){
-    console.log("here")
-    whereClause += ` AND price <= ?`; //? needed ?
-    params.push(searchValue);
-
-}
-
-const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
-// Execute the SQL query using prepared statements
-console.log("here")
-connection.query(`SELECT * FROM items WHERE 1=1${whereClause} LIMIT 5`, params, (error, results) => {
-  if (error) {
-    res.status(500).send({ error: 'Error querying the database' });
-    return;
-  }
-  //res.send(results);
-  res.render('items/products', { items:results, brands});
-  
-  
-});
-
-
-},
-
-getItemsById: async (req, res) => {
-    var id = req.params.id;
-    try {
-        const items = await sqlQuery("SELECT * FROM items where id = "+ id+"");
-        const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
-        res.render('items/single_product', { items , brands});
-
-
-        //res.render('items/single_brand', { items , brand});
-    } catch (err) {
-        res.status(500).send(err);
+    // Construct the WHERE clause of the SQL query
+    let whereClause = '';
+    let params = [];
+    if (searchType=="name" ){
+        whereClause += ' AND name LIKE ?';
+        params.push(`%${searchValue}%`);
     }
+    if (searchType=="brand" ){
+        whereClause += ' AND brand LIKE ?';
+        params.push(`%${searchValue}%`);
+    }
+
+    if (searchType=="priceMin" ){
+        whereClause += ` AND price >= ?`; //? needed?
+        params.push(searchValue);
+    }
+
+
+    if (searchType=="priceMax" ){
+        console.log("here")
+        whereClause += ` AND price <= ?`; //? needed ?
+        params.push(searchValue);
+
+    }
+
+    const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
+    // Execute the SQL query using prepared statements
+    console.log("here")
+    connection.query(`SELECT * FROM items WHERE 1=1${whereClause} LIMIT 5`, params, (error, results) => {
+    if (error) {
+        res.status(500).send({ error: 'Error querying the database' });
+        return;
+    }
+    //res.send(results);
+    res.render('items/products', { items:results, brands});
+    
+    
+    });
+
+
 },
 
-    getItemsByBrand: async (req, res) => {
-        var brand = req.params.brand;
-        try {
-            const items = await sqlQuery("SELECT * FROM items where brand = '"+ brand+"'");
-            const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
-            res.render('items/products', { items , brands});
-
-
-            //res.render('items/single_brand', { items , brand});
-        } catch (err) {
-            res.status(500).send(err);
-        }
-    },
+    //*******************************cart ***************************************/
 
     add_cart: async (req, res) => {
         var id = req.body.id;
         var name = req.body.name;
-        var brand = req.body.brand;
-        var description = req.body.description;
+        // var brand = req.body.brand;
+        // var description = req.body.description;
         var price = parseInt(req.body.price, 10);
         var total = parseInt(req.body.price, 10);
         var image = req.body.image;
         var quantity= 1;
 
-        var product = {id: id, name: name, brand:brand, description: description, price: price, image:image, quantity: quantity, total:total};
-        if (req.session.cart){
-            var cart = req.session.cart;
-            var newItem = true;
+        var product = {id: id, name: name, price: price, image:image, quantity: quantity, total:total};
+        if(! req.session.cart){
+            req.session.cart = [];
+            const query = 'SELECT p.name, c.product_id, c.quantity, p.price, p.image FROM cart c JOIN items p ON c.product_id = p.id';
+            try {
+            const result = await sqlQuery(query);
+            
+            req.session.cart = result.map(row => ({ id: row.product_id, quantity: row.quantity , name: row.name,  price: parseFloat(parseFloat(row.price).toFixed(2)), image: row.image, total:parseFloat(parseFloat(row.price).toFixed(2))*parseFloat(parseFloat(row.quantity).toFixed(2))}));
+            } catch (err) {
+            console.error(err);
+            }
 
-            for(let i=0; i<cart.length; i++){
-                if (cart[i].id == id){
-                    cart[i].quantity++;
-                    cart[i].total += cart[i].price;
-                    newItem= false;
+        }
+        
+        var cart = req.session.cart;
+
+        const items = await sqlQuery("SELECT * FROM cart where product_id = "+ id+"");
+        console.log(items);
+        console.log(items.length<1);
+        if(items.length<1){
+            connection.query(
+                'INSERT INTO cart SET ?',
+                { product_id: id },
+                (error, results) => {
+                    if (error) throw error;
+                    console.log(results);
                 }
-            }
-
-            if (newItem){
+                );
                 cart.push(product)
-            }
-
-            calculateTotal(cart, req);
-            req.flash('success', 'Product added!');
-            res.redirect('back');
 
         }
         else{
-            req.session.cart = [];
-            var cart = req.session.cart;
-            cart.push(product);
-            calculateTotal(cart, req);
-            req.flash('success', 'Product added!');
-            res.redirect('back');
+            var newQuantity = items[0].quantity+1
+            connection.query(
+                
+                'UPDATE cart SET quantity = ? WHERE product_id = ?',
+                [newQuantity, id],
+                (error, results) => {
+                    if (error) throw error;
+                    console.log(results);
+                }
+                );
+                console.log(cart);
+                console.log(items[0].id);
+                console.log(items[0].id - 1);
+                    cart[items[0].id - 1 ].quantity++;
+                    cart[items[0].id - 1].total += parseFloat(cart[items[0].id - 1].price).toFixed(2);
+            }
+        console.log(cart);
+        calculateTotal(cart, req);
+        req.flash('success', 'Product added!');
+        res.redirect('back');
 
-        }
     },
     getCart: async (req, res) => {
         const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
-        
-        if(!req.session.cart){
+        if(! req.session.cart){
             req.session.cart = [];
+            const query = 'SELECT p.name, c.product_id, c.quantity, p.price, p.image FROM cart c JOIN items p ON c.product_id = p.id';
+
+            try {
+            const result = await sqlQuery(query);
+            
+            req.session.cart = result.map(row => ({ id: row.product_id, quantity: row.quantity , name: row.name,  price: parseFloat(parseFloat(row.price).toFixed(2)), image: row.image, total:parseFloat(parseFloat(row.price).toFixed(2))*parseFloat(parseFloat(row.quantity).toFixed(2))}));
+            } catch (err) {
+            console.error(err);
+            }
+
         }
+        
         var cart = req.session.cart;
+        calculateTotal(cart, req);
         var total = req.session.total;
 
         res.render('items/cart', {cart: cart, total:total, brands: brands});
            
     },
-    getProducts: async (req, res) => {
+    updateCart: async (req, res) => {
+        var id = req.params.product;
+        var cart = req.session.cart;
+        var action = req.query.action;
+        var total = req.session.total;
+        for (let i=0; i < cart.length; i++) {
+            if (cart[i].id== id) {
+                switch (action) {
+                    case "add":
+                        cart[i].quantity++;
+                        var newQuantity = cart[i].quantity;
+                        cart[i].total += cart[i].price;
+                        connection.query(
+                            'UPDATE cart SET quantity = ? WHERE product_id = ?',
+                            [newQuantity, cart[i].id],
+                            (error, results) => {
+                                if (error) throw error;
+                                console.log(results);
+                            }
+                            
+                            );
+                        
+                        break;
+                    case "remove":
+                        cart[i].quantity--;
+                        var newQuantity = cart[i].quantity;
+                        cart[i].total -= cart[i].price;
+                        connection.query(
+                            'UPDATE cart SET quantity = ? WHERE product_id = ?',
+                            [newQuantity, cart[i].id],
+                            (error, results) => {
+                                if (error) throw error;
+                                console.log(results);
+                            }
+                            );
+                        
+                        if (cart[i].quantity == 0){
+                            connection.query(
+                                'DELETE FROM cart WHERE product_id = ?',
+                                [cart[i].id],
+                                (error, results) => {
+                                  if (error) throw error;
+                                  console.log(results);
+                                }
+                              );
+                              cart.splice(i, 1);
+                        }
+                            
+                        break;
+                    case "clear":
+                        connection.query(
+                            'DELETE FROM cart WHERE product_id = ?',
+                            [cart[i].id],
+                            (error, results) => {
+                              if (error) throw error;
+                              console.log(results);
+                            }
+                          );
+                        cart.splice(i, 1);
+                        break;
+                    default:
+                        console.log("update problem");
+                        break;
+                    
         
-
-        try {
-            const items = await sqlQuery('SELECT * FROM items');
-            const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
-            // shuffle items at random
-            for (let i = items.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [items[i], items[j]] = [items[j], items[i]];
+                }
+                break;
             }
-            res.render('items/products', { items, brands});
-        } catch (err) {
-            res.status(500).send(err);
-        }
-           
+        
+    }
+    calculateTotal(cart, req);
+    // req.flash('success', 'cart updated');
+    res.redirect('back');
     },
+    //**************payment********************************************************/
     go_checkout: async(req, res) => {
 
-        if (!req.session.cart)
+        if(! req.session.cart){
             req.session.cart = [];
+            const query = 'SELECT p.name, c.product_id, c.quantity, p.price, p.image FROM cart c JOIN items p ON c.product_id = p.id';
+
+            try {
+            const result = await sqlQuery(query);
             
+            req.session.cart = result.map(row => ({ id: row.product_id, quantity: row.quantity , name: row.name,  price: parseFloat(parseFloat(row.price).toFixed(2)), image: row.image, total:parseFloat(parseFloat(row.price).toFixed(2))*parseFloat(parseFloat(row.quantity).toFixed(2))}));
+            } catch (err) {
+            console.error(err);
+            }
+
+        }
+        
         var cart = req.session.cart;
+        calculateTotal(cart, req);
         const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
         var total = req.session.total
         res.render('items/checkout', {total:total, brands:brands, cart:cart})
@@ -363,45 +475,19 @@ getItemsById: async (req, res) => {
     pay: async (req, res)=>{
         const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
         var total = req.session.total
+        const query = `TRUNCATE TABLE cart`;
+        try {
+        await sqlQuery(query);
+        //res.sendStatus(200);
+        } catch (err) {
+        console.error(err);
+        //res.sendStatus(500);
+        }
+        req.session.cart = []
         res.render('items/payment', {total:total,brands:brands})
     },
-    updateCart: async (req, res) => {
-        var id = req.params.product;
-        var cart = req.session.cart;
-        var action = req.query.action;
-        var total = req.session.total;
-        for (let i=0; i < cart.length; i++) {
-            if (cart[i].id== id) {
-                switch (action) {
-                    case "add":
-                        cart[i].quantity++;
-                        cart[i].total += cart[i].price;
-                        break;
-                    case "remove":
-                        cart[i].quantity--;
-                        cart[i].total -= cart[i].price;
-                        if (cart[i].quantity == 0)
-                            cart.splice(i, 1);
-                        break;
-                    case "clear":
-                        cart.splice(i, 1);
-                        break;
-                    default:
-                        console.log("update problem");
-                        break;
-                    
-        
-                }
-                break;
-            }
-        
-    }
-    calculateTotal(cart, req);
-    // req.flash('success', 'cart updated');
-    res.redirect('back');
-    },
 
- 
+    //*********filter*****************************/
     filterProducts: async (req, res) => {
         try {
             const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
@@ -409,8 +495,6 @@ getItemsById: async (req, res) => {
             var perPage = parseInt(req.query.per_page) || 7;
             var offset = (page - 1) * perPage;
             let query = 'SELECT * FROM items LIMIT ' + perPage + ` OFFSET ` + offset + ``;
-            console.log(query);
-
             // Extract the filters from the request body
 
             if(req.query.brand != undefined || req.query.price != undefined){

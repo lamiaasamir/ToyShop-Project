@@ -39,10 +39,9 @@
                 <h3 class="font-weight-semi-bold mb-4"><%= item.price %></h3>
                 <p class="mb-4"><%= item.description%></p>
                 
-                </div>
                 <div class="d-flex align-items-center mb-4 pt-2">
                     <div class="input-group quantity mr-3" style="width: 130px;">
-                        <div class="input-group-btn">
+                        <!-- <div class="input-group-btn">
                             <button class="btn btn-primary btn-minus" >
                             <i class="fa fa-minus"></i>
                             </button>
@@ -52,9 +51,22 @@
                             <button class="btn btn-primary btn-plus">
                                 <i class="fa fa-plus"></i>
                             </button>
-                        </div>
+                        </div> -->
                     </div>
-                    <button class="btn btn-primary px-3"><i class="fa fa-shopping-cart mr-1"></i> Add To Cart</button>
+                    <form action="/add_to_cart" method="post">
+                        <input type="hidden" name="id" value="<%= item.id %>">
+                        <input type="hidden" name="name" value="<%= item.name %>">
+                        <input type="hidden" name="brand" value="<%= item.brand %>">
+                        <input type="hidden" name="description" value="<%= item.description %>">
+                        <input type="hidden" name="price" value="<%= item.price %>">
+                        <input type="hidden" name="image" value="<%= item.image %>">
+                        <!-- <input type="submit" value="<%= item.id %>"> -->
+
+                        <a href="" class="fa fa-shopping-cart"><input type = "submit" value = " Add To Cart" class="btn btn-primary px-3 "></a>
+
+
+                    </form>
+                    <!-- <button class="btn btn-primary px-3"><i class="fa fa-shopping-cart mr-1"></i> Add To Cart</button> -->
                 </div>
                 <div class="d-flex pt-2">
                     <p class="text-dark font-weight-medium mb-0 mr-2">Share on:</p>

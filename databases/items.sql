@@ -38,3 +38,16 @@ INSERT INTO `items` (`name`, `brand`, `description`, `price`, `image`) VALUES
 ('UNO Collector Tin', 'UNO', 'A premium quality uno set', 49.39, 'uno-phase10-snappy.png'),
 ('Razor MX350 Bike', 'Razor', 'A powerful electric bike', 328.00, 'mx350-bike.png');
 
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cart`
+--
+
+CREATE TABLE  IF NOT EXISTS `cart` (
+  `product_id` int(11) NOT NULL PRIMARY KEY,
+  `quantity` int(11) NOT NULL DEFAULT 1
+  FOREIGN KEY (`product_id`) REFERENCES `items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) 
+
