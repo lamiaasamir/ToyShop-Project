@@ -36,7 +36,14 @@
                         <small class="far fa-star"></small>
                     </div>
                 </div>
-                <h3 class="font-weight-semi-bold mb-4"><%= item.price %></h3>
+                <% if (item.sale_price){ %>
+                    <h3 class="font-weight-semi-bold mb-4"><%= item.sale_price %></h3>
+                    <h6 class="font-weight-semi-bold mb-4"><del><%= item.price%></del></h6>
+
+                <%} else{ %>
+                    <h3 class="font-weight-semi-bold mb-4"><%= item.price %></h3>
+                <% } %>
+                <!-- <h3 class="font-weight-semi-bold mb-4"><%= item.price %></h3> -->
                 <p class="mb-4"><%= item.description%></p>
                 
                 <div class="d-flex align-items-center mb-4 pt-2">

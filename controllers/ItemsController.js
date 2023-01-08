@@ -260,19 +260,33 @@ module.exports = {
         var name = req.body.name;
         // var brand = req.body.brand;
         // var description = req.body.description;
+        var sale_price = parseInt(req.body.sale_price);
         var price = parseInt(req.body.price, 10);
         var total = parseInt(req.body.price, 10);
         var image = req.body.image;
         var quantity= 1;
-
+        if (sale_price) {
+            price = sale_price;
+            total = sale_price;
+        }
         var product = {id: id, name: name, price: price, image:image, quantity: quantity, total:total};
         if(! req.session.cart){
             req.session.cart = [];
-            const query = 'SELECT p.name, c.product_id, c.quantity, p.price, p.image FROM cart c JOIN items p ON c.product_id = p.id';
+            const query = 'SELECT p.name, c.product_id, c.quantity, p.price, p.sale_price, p.image FROM cart c JOIN items p ON c.product_id = p.id';
             try {
             const result = await sqlQuery(query);
+            function myfunc(item){
+                if(item.sale_price){
+                    product = {id: item.product_id, name: item.name, price: parseFloat(parseFloat(item.sale_price).toFixed(2)), image:item.image, quantity: item.quantity, total:parseFloat(parseFloat(item.sale_price).toFixed(2))*parseFloat(parseFloat(item.quantity).toFixed(2))};
+                }
+                else{
+                    product = {id: item.product_id, name: item.name, price: parseFloat(parseFloat(item.price).toFixed(2)), image:item.image, quantity: item.quantity, total:parseFloat(parseFloat(item.price).toFixed(2))*parseFloat(parseFloat(item.quantity).toFixed(2))};
+                }
+                req.session.cart.push(product)
+            }
+            result.foreach(myfunc());
             
-            req.session.cart = result.map(row => ({ id: row.product_id, quantity: row.quantity , name: row.name,  price: parseFloat(parseFloat(row.price).toFixed(2)), image: row.image, total:parseFloat(parseFloat(row.price).toFixed(2))*parseFloat(parseFloat(row.quantity).toFixed(2))}));
+            // req.session.cart = result.map(row => ({ id: row.product_id, quantity: row.quantity , name: row.name,  price: parseFloat(parseFloat(row.price).toFixed(2)), image: row.image, total:parseFloat(parseFloat(row.price).toFixed(2))*parseFloat(parseFloat(row.quantity).toFixed(2))}));
             } catch (err) {
             console.error(err);
             }
@@ -323,16 +337,24 @@ module.exports = {
         const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
         if(! req.session.cart){
             req.session.cart = [];
-            const query = 'SELECT p.name, c.product_id, c.quantity, p.price, p.image FROM cart c JOIN items p ON c.product_id = p.id';
-
+            const query = 'SELECT p.name, c.product_id, c.quantity, p.price,p.sale_price,  p.image FROM cart c JOIN items p ON c.product_id = p.id';
+            
             try {
             const result = await sqlQuery(query);
-            
-            req.session.cart = result.map(row => ({ id: row.product_id, quantity: row.quantity , name: row.name,  price: parseFloat(parseFloat(row.price).toFixed(2)), image: row.image, total:parseFloat(parseFloat(row.price).toFixed(2))*parseFloat(parseFloat(row.quantity).toFixed(2))}));
+            function myfunc(item){
+                if(item.sale_price){
+                    product = {id: item.product_id, name: item.name, price: parseFloat(parseFloat(item.sale_price).toFixed(2)), image:item.image, quantity: item.quantity, total:parseFloat(parseFloat(item.sale_price).toFixed(2))*parseFloat(parseFloat(item.quantity).toFixed(2))};
+                }
+                else{
+                    product = {id: item.product_id, name: item.name, price: parseFloat(parseFloat(item.price).toFixed(2)), image:item.image, quantity: item.quantity, total:parseFloat(parseFloat(item.price).toFixed(2))*parseFloat(parseFloat(item.quantity).toFixed(2))};
+                }
+                req.session.cart.push(product)
+            }
+            result.foreach(myfunc());
+            // req.session.cart = result.map(row => ({ id: row.product_id, quantity: row.quantity , name: row.name,  price: parseFloat(parseFloat(row.price).toFixed(2)), image: row.image, total:parseFloat(parseFloat(row.price).toFixed(2))*parseFloat(parseFloat(row.quantity).toFixed(2))}));
             } catch (err) {
             console.error(err);
             }
-
         }
         
         var cart = req.session.cart;
@@ -421,18 +443,27 @@ module.exports = {
 
         if(! req.session.cart){
             req.session.cart = [];
-            const query = 'SELECT p.name, c.product_id, c.quantity, p.price, p.image FROM cart c JOIN items p ON c.product_id = p.id';
+            const query = 'SELECT p.name, c.product_id, c.quantity, p.price, p.sale_price, p.image FROM cart c JOIN items p ON c.product_id = p.id';
 
             try {
             const result = await sqlQuery(query);
+            function myfunc(item){
+                if(item.sale_price){
+                    product = {id: item.product_id, name: item.name, price: parseFloat(parseFloat(item.sale_price).toFixed(2)), image:item.image, quantity: item.quantity, total:parseFloat(parseFloat(item.sale_price).toFixed(2))*parseFloat(parseFloat(item.quantity).toFixed(2))};
+                }
+                else{
+                    product = {id: item.product_id, name: item.name, price: parseFloat(parseFloat(item.price).toFixed(2)), image:item.image, quantity: item.quantity, total:parseFloat(parseFloat(item.price).toFixed(2))*parseFloat(parseFloat(item.quantity).toFixed(2))};
+                }
+                req.session.cart.push(product)
+            }
+            result.foreach(myfunc());
             
-            req.session.cart = result.map(row => ({ id: row.product_id, quantity: row.quantity , name: row.name,  price: parseFloat(parseFloat(row.price).toFixed(2)), image: row.image, total:parseFloat(parseFloat(row.price).toFixed(2))*parseFloat(parseFloat(row.quantity).toFixed(2))}));
+            
+            // req.session.cart = result.map(row => ({ id: row.product_id, quantity: row.quantity , name: row.name,  price: parseFloat(parseFloat(row.price).toFixed(2)), image: row.image, total:parseFloat(parseFloat(row.price).toFixed(2))*parseFloat(parseFloat(row.quantity).toFixed(2))}));
             } catch (err) {
             console.error(err);
             }
-
         }
-        
         var cart = req.session.cart;
         calculateTotal(cart, req);
         const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
@@ -461,6 +492,7 @@ module.exports = {
                 console.log(err)
             }
             else{
+                console.log(23);
                 var query="INSERT INTO orders(cost, name, email, status, city, address,phone, date) VALUES ?";
                 var values = [[cost, name, email, status, city, address, phone, date]];
                 con.query(query,[values],(err, result)=>{
@@ -486,6 +518,7 @@ module.exports = {
         req.session.cart = []
         res.render('items/payment', {total:total,brands:brands})
     },
+    
 
     //*********filter*****************************/
     filterProducts: async (req, res) => {
@@ -494,7 +527,7 @@ module.exports = {
             var page = parseInt(req.query.page) || 1;
             var perPage = parseInt(req.query.per_page) || 7;
             var offset = (page - 1) * perPage;
-            let query = 'SELECT * FROM items LIMIT ' + perPage + ` OFFSET ` + offset + ``;
+            let query = 'SELECT * FROM items';
             // Extract the filters from the request body
 
             if(req.query.brand != undefined || req.query.price != undefined){
@@ -509,19 +542,20 @@ module.exports = {
              }
             query += ` AND `;
             
-
             }else query += ` where `;
             if(req.query.price != undefined){
+    
                 const filters = {
                 price: req.query.price || None
                     };
             
             if (req.query.price) {
-                query += `price <= ${filters.price}`;
+                query += `price < ${filters.price} or sale_price < ${filters.price}` ;
             }
           }
     
          }
+         query += ' LIMIT ' + perPage + ` OFFSET ` + offset + ``;
 
             // Execute the query and send the filtered products back to the client
             console.log(query);

@@ -61,7 +61,7 @@
         <div class="row align-items-center py-3 px-xl-5">
             <div class="col-lg-3 d-none d-lg-block">
                 <a href="" class="text-decoration-none">
-                    <h1 class="m-0 display-5 font-weight-semi-bold"><span class="text-primary font-weight-bold border px-3 mr-1">E</span>Shopper</h1>
+                    <h1 class="m-0 display-5 font-weight-semi-bold"><span class="text-primary font-weight-bold border px-3 mr-1">E</span>ToyShop</h1>
                 </a>
             </div>
             <div class="col-lg-6 col-6 text-left">
@@ -338,8 +338,14 @@
                     <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
                         <h6 class="text-truncate mb-3"><%= item.name %></h6>
                         <div class="d-flex justify-content-center">
-                            <h6><%= item.price %></h6>
-                            <!-- <h6 class="text-muted ml-2"><del>$123.00</del></h6> -->
+                            <% if (item.sale_price){ %>
+                                <h6><%= item.sale_price %></h6>
+                                <h6 class="text-muted ml-2"><del><%= item.price%></del></h6>
+    
+                            <%} else{ %>
+                                <h6><%= item.price %></h6>
+                            <% } %>
+                            
                         </div>
                     </div>
                     <div class="card-footer d-flex justify-content-between bg-light border">
@@ -350,6 +356,7 @@
                             <input type="hidden" name="brand" value="<%= item.brand %>">
                             <input type="hidden" name="description" value="<%= item.description %>">
                             <input type="hidden" name="price" value="<%= item.price %>">
+                            <input type="hidden" name="sale_price" value="<%= item.sale_price %>">
                             <input type="hidden" name="image" value="<%= item.image %>">
                             <!-- <input type="submit" value="<%= item.id %>"> -->
 
