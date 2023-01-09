@@ -17,7 +17,8 @@ const connection = mysql.createConnection({
   host: 'ls-ec92347fa4a7a46898eb0b7ce37632829fb67470.ccrbkmwhyu9z.eu-central-1.rds.amazonaws.com',
   port: 3306,
   user: 'shop',
-  password: 'Ssy%7?XV*e5b0aPshTB{vI>G1Q_cQe%d'
+  password: 'Ssy%7?XV*e5b0aPshTB{vI>G1Q_cQe%d',
+  database: 'shop'
 });
 
 //import controllers
