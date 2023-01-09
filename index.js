@@ -25,9 +25,12 @@ app.use(bodyParser.json());
 
 
 
-// import routes
+//import routes
 const routes = require('./routes/routes');
 app.use(routes);
+//Define Routes
+// app.use('/', require('./routes/routes'));
+// app.use('/auth', require('./routes/autu'));
 
 // define images folder
 //app.use('/images', express.static('./images'));

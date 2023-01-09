@@ -7,13 +7,18 @@ const multer = require('multer');
 const upload = multer();
 
 const mysql = require('mysql');
+// const connection = mysql.createConnection({
+//     host: 'localhost',
+//     user: 'root',
+//     password: '',
+//     database: 'shop'
+//   });
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'shop'
-  });
-  
+  host: 'ls-ec92347fa4a7a46898eb0b7ce37632829fb67470.ccrbkmwhyu9z.eu-central-1.rds.amazonaws.com',
+  port: 3306,
+  user: 'shop',
+  password: 'Ssy%7?XV*e5b0aPshTB{vI>G1Q_cQe%d'
+});
 
 //import controllers
 const ItemsController = require('../controllers/ItemsController');
@@ -56,7 +61,6 @@ router.get('/admin/products',async (req, res) => {
       res.status(500).send(err);
   }
 });
-
 
 
 router.post('/admin/products', upload.single('image'), async (req, res) => {
@@ -118,8 +122,4 @@ router.get('/admin/products/:id',async (req, res) => {
 
 
 module.exports = router;
-
-
-
-  
 

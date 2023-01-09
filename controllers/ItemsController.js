@@ -1,12 +1,19 @@
 const { calculateMac } = require('request/lib/hawk');
 const sqlQuery = require('../config/db');
 const mysql = require('mysql');
+// const connection = mysql.createConnection({
+//     host: 'localhost',
+//     user: 'root',
+//     password: '',
+//     database: 'shop'
+//   });
+
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'shop'
-  });
+  host: 'ls-ec92347fa4a7a46898eb0b7ce37632829fb67470.ccrbkmwhyu9z.eu-central-1.rds.amazonaws.com',
+  port: 3306,
+  user: 'shop',
+  password: 'Ssy%7?XV*e5b0aPshTB{vI>G1Q_cQe%d'
+});
 
 /***********************functions********************************/
 function isProductInCart(cart, id){
@@ -270,12 +277,13 @@ module.exports = {
             total = sale_price;
         }
         var product = {id: id, name: name, price: price, image:image, quantity: quantity, total:total};
-        if(! req.session.cart){
+        if(!req.session.cart){
             req.session.cart = [];
             const query = 'SELECT p.name, c.product_id, c.quantity, p.price, p.sale_price, p.image FROM cart c JOIN items p ON c.product_id = p.id';
             try {
-            const result = await sqlQuery(query);
+            var result = await sqlQuery(query);
             function myfunc(item){
+                console.log(item)
                 if(item.sale_price){
                     product = {id: item.product_id, name: item.name, price: parseFloat(parseFloat(item.sale_price).toFixed(2)), image:item.image, quantity: item.quantity, total:parseFloat(parseFloat(item.sale_price).toFixed(2))*parseFloat(parseFloat(item.quantity).toFixed(2))};
                 }
@@ -284,8 +292,8 @@ module.exports = {
                 }
                 req.session.cart.push(product)
             }
-            result.foreach(myfunc());
-            
+            result.forEach(myfunc);
+
             // req.session.cart = result.map(row => ({ id: row.product_id, quantity: row.quantity , name: row.name,  price: parseFloat(parseFloat(row.price).toFixed(2)), image: row.image, total:parseFloat(parseFloat(row.price).toFixed(2))*parseFloat(parseFloat(row.quantity).toFixed(2))}));
             } catch (err) {
             console.error(err);
@@ -296,8 +304,7 @@ module.exports = {
         var cart = req.session.cart;
 
         const items = await sqlQuery("SELECT * FROM cart where product_id = "+ id+"");
-        console.log(items);
-        console.log(items.length<1);
+        console.log(cart);
         if(items.length<1){
             connection.query(
                 'INSERT INTO cart SET ?',
@@ -318,16 +325,17 @@ module.exports = {
                 [newQuantity, id],
                 (error, results) => {
                     if (error) throw error;
-                    console.log(results);
                 }
                 );
-                console.log(cart);
-                console.log(items[0].id);
-                console.log(items[0].id - 1);
-                    cart[items[0].id - 1 ].quantity++;
-                    cart[items[0].id - 1].total += parseFloat(cart[items[0].id - 1].price).toFixed(2);
+                
+            console.log(cart);
+            for (let i=0; i < cart.length; i++) {
+                if (cart[i].id== items[0].product_id) {
+                    cart[i].quantity++;
+                    cart[i].total += parseFloat(cart[i].price).toFixed(2);
+                }
             }
-        console.log(cart);
+        }
         calculateTotal(cart, req);
         req.flash('success', 'Product added!');
         res.redirect('back');
@@ -335,13 +343,16 @@ module.exports = {
     },
     getCart: async (req, res) => {
         const brands = await sqlQuery('SELECT brand, image, COUNT(*) as count FROM items GROUP BY brand');
-        if(! req.session.cart){
+        if(!req.session.cart){
             req.session.cart = [];
             const query = 'SELECT p.name, c.product_id, c.quantity, p.price,p.sale_price,  p.image FROM cart c JOIN items p ON c.product_id = p.id';
-            
+            console.log("dddd")
+
             try {
-            const result = await sqlQuery(query);
+            var result = await sqlQuery(query);
+            console.log(result)
             function myfunc(item){
+                console.log(item)
                 if(item.sale_price){
                     product = {id: item.product_id, name: item.name, price: parseFloat(parseFloat(item.sale_price).toFixed(2)), image:item.image, quantity: item.quantity, total:parseFloat(parseFloat(item.sale_price).toFixed(2))*parseFloat(parseFloat(item.quantity).toFixed(2))};
                 }
@@ -356,7 +367,7 @@ module.exports = {
             console.error(err);
             }
         }
-        
+         console.log(cart)
         var cart = req.session.cart;
         calculateTotal(cart, req);
         var total = req.session.total;
@@ -527,7 +538,7 @@ module.exports = {
             var page = parseInt(req.query.page) || 1;
             var perPage = parseInt(req.query.per_page) || 7;
             var offset = (page - 1) * perPage;
-            let query = 'SELECT * FROM items';
+            let query = 'SELECT * FROM items where (1=1)';
             // Extract the filters from the request body
 
             if(req.query.brand != undefined || req.query.price != undefined){
@@ -538,11 +549,10 @@ module.exports = {
             // Filter the products using the filters
         
             if (filters.brand.length > 0) {
-            query += ` WHERE brand IN ("${filters.brand.join('","')}")`;
+            query += ` and brand IN ("${filters.brand.join('","')}")`;
              }
-            query += ` AND `;
-            
-            }else query += ` where `;
+
+            } 
             if(req.query.price != undefined){
     
                 const filters = {
@@ -550,7 +560,7 @@ module.exports = {
                     };
             
             if (req.query.price) {
-                query += `price < ${filters.price} or sale_price < ${filters.price}` ;
+                query += ` and (price < ${filters.price} or sale_price < ${filters.price})` ;
             }
           }
     
